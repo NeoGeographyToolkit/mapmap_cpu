@@ -30,8 +30,8 @@ find_package(TBB REQUIRED)
 
 # selection what to build
 option(BUILD_MEMSAVE "Use memory-saving mode. Might influence performance negatively." OFF)
-option(BUILD_TEST "Build Google Tests for mapMAP modules." ON)
-option(BUILD_DEMO "Build a demo, reading SHIMF datasets into mapMAP." ON)
+option(BUILD_TEST "Build Google Tests for mapMAP modules." OFF)
+option(BUILD_DEMO "Build a demo, reading SHIMF datasets into mapMAP." OFF)
 
 # default to Release build and C++11 mode
 set(CMAKE_CXX_STANDARD 11)
