@@ -1,24 +1,37 @@
-cmake_minimum_required(VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+# set(CMAKE_C_COMPILER "gcc")
+# set(CMAKE_CXX_COMPILER "g++")
 
 project(mapMAP)
+
+if("${MULTIVIEW_DEPS_DIR}" STREQUAL "")
+  message(FATAL_ERROR "Set MULTIVIEW_DEPS_DIR as the path to a conda env having the dependencies.")
+endif()
+
+set(CMAKE_BUILD_TYPE "Release")
+message(STATUS "Setting build type: ${CMAKE_BUILD_TYPE}")
+
+# Where to search for dependencies
+set(CMAKE_PREFIX_PATH "${MULTIVIEW_DEPS_DIR};${CMAKE_PREFIX_PATH}")
+set(CMAKE_MODULE_PATH "${MULTIVIEW_DEPS_DIR}/lib/cmake/Ceres;${CMAKE_MODULE_PATH}")
 
 include(ExternalProject)
 include(FetchContent)
 
-# add TBB (build locally))
-set(TBB_TEST OFF CACHE BOOL "Build TBB tests.")
-FetchContent_Declare(oneTBB
-    GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
-    GIT_TAG v2021.5.0)
-FetchContent_MakeAvailable(oneTBB)
+find_package(TBB REQUIRED)
+
+# # add TBB (build locally))
+# set(TBB_TEST OFF CACHE BOOL "Build TBB tests.")
+# FetchContent_Declare(oneTBB
+#     GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
+#     GIT_TAG v2021.5.0)
+# FetchContent_MakeAvailable(oneTBB)
 
 # selection what to build
 option(BUILD_MEMSAVE "Use memory-saving mode. Might influence performance negatively." OFF)
-option(BUILD_TEST "Build Google Tests for mapMAP modules." ON)
-option(BUILD_DEMO "Build a demo, reading SHIMF datasets into mapMAP." ON)
+option(BUILD_TEST "Build Google Tests for mapMAP modules." OFF)
+option(BUILD_DEMO "Build a demo, reading SHIMF datasets into mapMAP." OFF)
 
 # default to Release build and C++11 mode
 set(CMAKE_CXX_STANDARD 11)
@@ -208,6 +221,9 @@ source_group("Test" FILES
     ${impl_test}
     ${src_test})
 
+# build tests
+if(BUILD_TEST)
+
 # CMake as dependency: download and build
 externalproject_add(googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
@@ -225,9 +241,6 @@ include_directories(SYSTEM
 ExternalProject_Get_Property(googletest binary_dir)
 link_directories(
     ${binary_dir}/lib)
-
-# build tests
-if(BUILD_TEST)
 
 add_executable(mapmap_test
     ${src_test})
